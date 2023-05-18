@@ -16,8 +16,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-
-# Membaca file datasrt
+# Membaca file dataset
 tweets_raw = pd.read_csv("tweets_raw.csv")
 
 # Cetak 5 baris pertama dari dataset
@@ -26,7 +25,7 @@ print(tweets_raw.head())
 # Menghapus kolom yang tidak diperlukan
 tweets_raw.drop(columns=["Unnamed: 0", "Unnamed: 0.1"], axis=1, inplace=True)
 
-# MEnghapus baris yang ada duplikasinya
+# Menghapus baris yang ada duplikasinya
 tweets_raw.drop_duplicates(inplace=True)
 
 # Membuat kolom created at
