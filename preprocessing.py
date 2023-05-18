@@ -54,23 +54,23 @@ def preprocess_text(text):
     # remove stop words
     stop_words = set(stopwords.words('english'))
     tokens = word_tokenize(text)
-    words = [w for w in tokens if not w in stop_words]
-    text = " ".join(w for w in words)
+    words = [word for word in tokens if not word in stop_words]
+    text = " ".join(word for word in words)
     
     # Remove non-alphabetic characters and keep the words contains three or more letters
     tokens = word_tokenize(text)
-    words = [w for w in
-             tokens if w.isalpha() and len(w)>2]
-    text = " ".join(w for w in words)
+    words = [word for word in
+             tokens if word.isalpha() and len(word)>2]
+    text = " ".join(word for word in words)
     
     # Lemmatize
     lemmatizer = WordNetLemmatizer()
     tokens = word_tokenize(text)
-    words = [lemmatizer.lemmatize(w, pos = 'a') for w in tokens]
-    result = " ".join(w for w in words)
+    words = [lemmatizer.lemmatize(word, pos = 'a') for word in tokens]
+    result = " ".join(word for word in words)
     return result
 
-tweets_raw['result_processed'] = [preprocess_text(post) for post in tweets_raw['Content'].values]
+tweets_raw["result_processed"] = tweets_raw["Content"].apply(preprocess_text)
 
 # Print the first fifteen rows of Processed
 print(tweets_raw[["result_processed"]].head(15))
