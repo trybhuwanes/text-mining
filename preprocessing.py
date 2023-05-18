@@ -14,6 +14,8 @@ from PIL import Image
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import seaborn as sns
+
 
 # Membaca file datasrt
 tweets_raw = pd.read_csv("tweets_raw.csv")
@@ -21,43 +23,50 @@ tweets_raw = pd.read_csv("tweets_raw.csv")
 # Cetak 5 baris pertama dari dataset
 print(tweets_raw.head())
 
-# Cetak summary statistics
-# print(tweets_raw.describe())
-
-# We do not need first two columns. Let's drop them out.
+# Menghapus kolom yang tidak diperlukan
 tweets_raw.drop(columns=["Unnamed: 0", "Unnamed: 0.1"], axis=1, inplace=True)
 
-# Drop duplicated rows
+# MEnghapus baris yang ada duplikasinya
 tweets_raw.drop_duplicates(inplace=True)
 
-# Created at column's type should be datatime
+# Membuat kolom created at
 tweets_raw["Created at"] = pd.to_datetime(tweets_raw["Created at"])
 
-# Fill the missing values with unknown tag
+# MEngisi nilai yang kosong
 tweets_raw["Location"].fillna("unknown", inplace=True)
 
 print(tweets_raw.head())
 
-# Pre-Processing Function 
+# Histogram kata-kata paling sering muncul
+word_freq = tweets_raw["Content"].str.split().explode().value_counts().reset_index()
+word_freq.columns = ["Word", "Frequency"]
+
+plt.figure(figsize=(12, 6))
+sns.barplot(x="Frequency", y="Word", data= word_freq.head(20))
+plt.title("20 Kata Paling Sering Muncul")
+plt.xlabel("Frekuensi")
+plt.ylabel("Kata")
+plt.show()
+
+# Fungsi Pre-Processing 
 def preprocess_text(text): 
-    # get lowercase
+    # Mengganti ke huruf kecil
     text = text.lower()
-    # remove numbers
+    # Menghapus angka
     text = re.sub(r'\d+', '', text)
-    # remove urls
+    # Menghapus URL/link
     text = re.sub(r'^https?:\/\/.*[\r\n]*', '', text)
-    # remove punctuation
+    # Menghapus punctuation
     text = text.translate(text.maketrans('', '', string.punctuation))
-    # strip whitespace
+    # Menghapus whitespace
     text = text.strip()
-    
-    # remove stop words
+    # Stop words
     stop_words = set(stopwords.words('english'))
     tokens = word_tokenize(text)
     words = [word for word in tokens if not word in stop_words]
     text = " ".join(word for word in words)
     
-    # Remove non-alphabetic characters and keep the words contains three or more letters
+    # Menghapus non-alphabetic dan tidak menghapus kata yang terdiri dari minimal 3 huruf
     tokens = word_tokenize(text)
     words = [word for word in
              tokens if word.isalpha() and len(word)>2]
@@ -70,7 +79,8 @@ def preprocess_text(text):
     result = " ".join(word for word in words)
     return result
 
+# Mengaplikasikan fungsi ke kolom Content dan disimpan di kolom result_preprocessed
 tweets_raw["result_processed"] = tweets_raw["Content"].apply(preprocess_text)
 
-# Print the first fifteen rows of Processed
+# Mencetak hasil preprocessing sebanyak 14 data
 print(tweets_raw[["result_processed"]].head(15))
