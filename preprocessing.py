@@ -10,6 +10,9 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 import nltk.corpus  
 from nltk.text import Text 
 from PIL import Image
+from sklearn.model_selection import train_test_split
+from sklearn import svm
+from sklearn.metrics import confusion_matrix, classification_report
 
 import numpy as np
 import matplotlib as mpl
@@ -17,27 +20,29 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Membaca file dataset
-tweets_raw = pd.read_csv("tweets_raw.csv")
+tweets_raw = pd.read_csv("tweets_april_raw.csv")
 
 # Cetak 5 baris pertama dari dataset
 print(tweets_raw.head())
 
-# Menghapus kolom yang tidak diperlukan
-tweets_raw.drop(columns=["Unnamed: 0", "Unnamed: 0.1"], axis=1, inplace=True)
+# # Menghapus kolom yang tidak diperlukan
+# deleteColumns = ["coordinates", "hashtags", "media", "urls", "in_reply_to_screen_name", "in_reply_to_status_id", "in_reply_to_user_id", "place", "quote_id", "retweet_count", "retweet_id", "retweet_screen_name", "source", "tweet_url", "user_id", "user_default_profile_image", "user_description", "user_favourites_count", "user_followers_count", "user_friends_count", "user_listed_count", "user_location", "user_name", "user_screen_name", "user_statuses_count", "user_time_zone", "user_urls", "user_verified"]
+tweets_raw.drop(columns=["coordinates", "hashtags", "media", "urls", "favorite_count", "id", "in_reply_to_screen_name", "in_reply_to_status_id", "in_reply_to_user_id", "lang", "place", "quote_id", "retweet_count", "retweet_id", "retweet_screen_name", "source", "tweet_url","user_created_at", "user_id", "user_default_profile_image", "user_description", "user_favourites_count", "user_followers_count", "user_friends_count", "user_listed_count", "user_location", "user_name", "user_screen_name", "user_statuses_count", "user_time_zone", "user_urls", "user_verified"], axis=1, inplace=True)
 
-# Menghapus baris yang ada duplikasinya
+# # Menghapus baris yang ada duplikasinya
 tweets_raw.drop_duplicates(inplace=True)
 
-# Membuat kolom created at
-tweets_raw["Created at"] = pd.to_datetime(tweets_raw["Created at"])
+# # Membuat kolom created at
+# tweets_raw["Created at"] = pd.to_datetime(tweets_raw["Created at"])
 
-# MEngisi nilai yang kosong
-tweets_raw["Location"].fillna("unknown", inplace=True)
+# # MEngisi nilai yang kosong
+tweets_raw["possibly_sensitive"].fillna("TRUE", inplace=True)
 
 print(tweets_raw.head())
+print(tweets_raw.isna().sum())
 
 # Histogram kata-kata paling sering muncul
-word_freq = tweets_raw["Content"].str.split().explode().value_counts().reset_index()
+word_freq = tweets_raw["text"].str.split().explode().value_counts().reset_index()
 word_freq.columns = ["Word", "Frequency"]
 
 plt.figure(figsize=(12, 6))
@@ -79,7 +84,7 @@ def preprocess_text(text):
     return result
 
 # Mengaplikasikan fungsi ke kolom Content dan disimpan di kolom result_preprocessed
-tweets_raw["result_processed"] = tweets_raw["Content"].apply(preprocess_text)
+tweets_raw["result_processed"] = tweets_raw["text"].apply(preprocess_text)
 
 # Mencetak hasil preprocessing sebanyak 14 data
 print(tweets_raw[["result_processed"]].head(15))
